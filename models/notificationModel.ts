@@ -1,23 +1,23 @@
-// import mongoose from "mongoose";
+import mongoose from "mongoose";
 
-// const notificationSchema=new mongoose.Schema({
-//         user_id:{
-//             type:mongoose.Schema.Types.ObjectId,
-//             ref:'user'
-//         },
-//         sender_id:{
-//             type:mongoose.Schema.Types.ObjectId,
-//             ref:'user'
-//         },
-//         type:{
-//             type:String,
-//         },
-//         unread:{
-//             type:Boolean
-//         }
-//      },{
-//         timestamps:true
-//      }
-// )
+const notificationSchema=new mongoose.Schema({
+        userId:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'users'
+        },
+        senderId:{
+            type:mongoose.Schema.Types.ObjectId,
+            ref:'users'
+        },
+        type:{
+            type:String,
+        },
+        unread:{
+            type:Boolean
+        }
+     },{
+        timestamps:true
+     }
+)
 
-// export const Notification=mongoose.model('notifications',notificationSchema)
+export const Notification=mongoose.model('notifications',notificationSchema)

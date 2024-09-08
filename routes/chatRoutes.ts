@@ -9,4 +9,4 @@ chatRouter.get('/getChats',protect,get_chats)
 
 chatRouter.get('/getunreadmessages',protect,get_unread_messages)
 chatRouter.post('/getchatunreadmessages',protect,get_chat_unread_messages)
-chatRouter.patch('/clearunreadmessages',protect,clear_unread_messages)
+chatRouter.patch('/clearUnreadMessages',protect,clear_unread_messages)
