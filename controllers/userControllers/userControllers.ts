@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { User } from "../../models/userModel";
 import mongoose from "mongoose";
 import { Chat } from "../../models/chatModel";
+import { Notification } from "../../models/notificationModel";
 
 export const get_profile_details = async (req: Request, res: Response) => {
   try {
@@ -109,13 +110,13 @@ export const followUnfollow = async (req: Request, res: Response) => {
         { _id: profileId },
         { $addToSet: { followers: userId } }
       );
-      // const newnotification = new Notification({
-      //   user_id: profileId,
-      //   sender_id: userId,
-      //   type: "Follow",
-      //   unread: true,
-      // });
-      // await newnotification.save();
+      const newnotification = new Notification({
+        userId: profileId,
+        senderId: userId,
+        type: "Follow",
+        unread: true,
+      });
+      await newnotification.save();
 
       if (isFollowingBack.length > 0) {
         const chat = await Chat.findOne({

@@ -4,7 +4,7 @@ import { Comment } from "../../models/commentModel";
 import mongoose from "mongoose";
 // import { Report } from "../../models/reportModel";
 import cloudinary from "../../utils/cloudinary";
-// import { Notification } from "../../models/notificationModel";
+import { Notification } from "../../models/notificationModel";
 // import { Saved } from "../../models/savedModel";
 
 export const create_post = async (req: Request, res: Response) => {
@@ -118,29 +118,28 @@ export const like_unlike = async (req: Request, res: Response) => {
     });
     if (isAlreadyLiked.length > 0) {
       await Post.updateOne({ _id: postId }, { $pull: { likes: user } });
-      // await Notification.deleteOne({
-      //   user_id: post?.user_id,
-      //   sender_id: user,
-      //   type: "Like",
-      // });
-      // res.status(200).json({ liked: false, message: "unliked the post" });
+    //   if(post?.userId.toString() !== user){
+    //   await Notification.deleteOne({
+    //     userId: post?.userId,
+    //     senderId: user,
+    //     type: "Like",
+    //   });
+    // }
       res.status(200).json({message: "Unliked the post" });
     } else {
       await Post.updateOne({ _id: postId }, { $addToSet: { likes: user } });
-      // let newnotification;
-      // if(post?.user_id.toString() !== user ){
-      //  newnotification = new Notification({
-      //   user_id: post?.user_id,
-      //   sender_id: user,
-      //   type: "Like",
-      //   unread: true,
-      // });
-      // await newnotification.save();
+      let newnotification;
+      if(post?.userId.toString() !== user ){
+       newnotification = new Notification({
+        userId: post?.userId,
+        senderId: user,
+        type: "Like",
+        unread: true,
+      });
+      await newnotification.save();
       res.status(200).json({ message:'Liked' });
-    }
-      // res.status(200).json({ liked: true, newnotification });
-     
-
+      }
+    } 
   } catch (error) {
     console.error(error);
     res.status(400).json({message:'like failed'})

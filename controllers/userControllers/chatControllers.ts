@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { Chat } from "../../models/chatModel";
 import { Message } from "../../models/messageModel";
+import { Document } from "mongoose";
 
 export const sendMessage = async (req: Request, res: Response) => {
   try {
-    console.log('ll')
     const sender = req.userId;
     const reciever = req.body.recieverId;
     const content = req.body.message;
@@ -28,10 +28,8 @@ export const sendMessage = async (req: Request, res: Response) => {
            chat._id ,
           {  latest_message: newmessage._id  }
         );
-        const messagedata = await Message.findById(newmessage._id).populate(
-          "chatId"
-        );
-        res.status(200).json({ message: messagedata });
+        const messagedata = await Message.findById(newmessage._id);
+        res.status(200).json({status:'success', message: messagedata });
       } catch (error) {
         console.log(error);
       }
@@ -52,10 +50,8 @@ export const sendMessage = async (req: Request, res: Response) => {
           newchat._id ,
           {  latest_message: newmessage._id  }
         );
-        const messagedata = await Message.findById(newmessage._id).populate(
-          "chatId"
-        );
-        res.status(200).json({ message: messagedata });
+        const messagedata = await Message.findById(newmessage._id);
+        res.status(200).json({status:'success',  message: messagedata });
       } catch (error) {
         console.log(error);
       }
@@ -87,6 +83,10 @@ export const get_messages = async (req: Request, res: Response) => {
   }
 };
 
+interface ChatWithUnreadCount extends Document {
+  unreadCount?: number;
+}
+
 export const get_chats = async (req: Request, res: Response) => {
   try {
     const userId = req.userId;
@@ -96,7 +96,16 @@ export const get_chats = async (req: Request, res: Response) => {
         match: { _id: { $ne: userId } },
       })
       .populate("latest_message");
-    res.status(200).json({status:'success',message:'All chats fetched',allchats});
+
+      const allChatsWithUnreadCount = await Promise.all(
+        allchats.map(async (chat:ChatWithUnreadCount) => {
+          const chatObject = chat.toObject(); 
+          const messages = await Message.find({ chatId: chat._id, unread: true, recieverId: userId });
+          chatObject.unreadCount = messages.length;
+          return chatObject; 
+        })
+      );
+    res.status(200).json({status:'success',message:'All chats fetched',allchats:allChatsWithUnreadCount});
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: "chats fetching failed" });
@@ -144,7 +153,7 @@ export const clear_unread_messages = async (
     const {chatId} = req.body
 
     await Message.updateMany(
-      { user_id: userId,chat_id:chatId },
+      { recieverId: userId,chatId },
       { $set: { unread: false } }
     );
     res.status(200).json({ message: "Ok" });
